@@ -19,7 +19,7 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import TruncatedSVD
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 import joblib
 
 def load_data(database_filepath):
@@ -69,9 +69,12 @@ def build_model():
                     ])
 
     # create parameter grid
+    #'clf__estimator__min_samples_split': [2, 3, 4],
+    #'clf__estimator__n_estimators': [50, 100],
     param_grid = {
-        'clf__estimator__n_estimators': [1000],
-        'clf__estimator__min_samples_split': [2]
+        'clf__estimator__n_estimators': [50],
+        'clf__estimator__min_samples_split': [2]  
+      #,  'clf__estimator__criterion': ['entropy', 'gini']
      }
 
     # Create GridSearchCV object
@@ -81,18 +84,14 @@ def build_model():
     return cv
 
 
-def evaluate_model(model, X_test, Y_test):
+def evaluate_model(model, X_test, Y_test, category_names):
+  
+    Y_pred = model.predict(X_test)
     
-    y_pred = model.predict(X_test)
-    labels = np.unique(y_pred)
-    confusion_mat = confusion_matrix(Y_test, y_pred, labels=labels)
-    accuracy = (y_pred == Y_test).mean()
-
-    print("Labels:", labels)
-    print("Confusion Matrix:\n", confusion_mat)
-    print("Accuracy:", accuracy)
-    print("\nBest Parameters:", model.best_params_)
-
+    # Calculate model accuracy 
+    for i in range(len(category_names)):
+        print("Category:", category_names[i],"\n", classification_report(Y_test.iloc[:, i].values, Y_pred[:, i]))
+        print('Accuracy of %25s: %.2f' %(category_names[i], accuracy_score(Y_test.iloc[:, i].values, Y_pred[:,i])))
 
 def save_model(model, model_filepath):
     
@@ -100,10 +99,13 @@ def save_model(model, model_filepath):
 
 
 def main():
+    
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
+        
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
+        
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         
         print('Building model...')
@@ -113,7 +115,7 @@ def main():
         model.fit(X_train, Y_train)
         
         print('Evaluating model...')
-        evaluate_model(model, X_test, Y_test)
+        evaluate_model(model, X_test, Y_test, category_names)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)
