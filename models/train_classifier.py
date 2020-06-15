@@ -59,7 +59,7 @@ def build_model():
     
     # Create a RandomForestClassifier object 
     
-    clf = RandomForestClassifier(n_estimators=100)
+    clf = RandomForestClassifier()
 
     # Create a pipeline object
     pipeline = Pipeline([
@@ -70,7 +70,7 @@ def build_model():
 
     # create parameter grid
     param_grid = {
-        #'clf__estimator__n_estimators': [200],
+        'clf__estimator__n_estimators': [1000],
         'clf__estimator__min_samples_split': [2]
      }
 
