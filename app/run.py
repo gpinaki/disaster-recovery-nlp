@@ -2,16 +2,17 @@ import json
 import plotly
 import pandas as pd
 import joblib
+import pickle
 
 from nltk.stem import WordNetLemmatizer
-from nltk.
-import word_tokenize
+from nltk import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
+
 
 
 app = Flask(__name__)
@@ -33,7 +34,7 @@ df = pd.read_sql_table('messages', engine)
 
 # load model
 model = joblib.load("../models/classifier.pkl")
-
+print("Model loaded")
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
